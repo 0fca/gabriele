@@ -55,7 +55,7 @@ void draw(){
 
     case 0:
     noFill();
-
+    drawHorAxis();
     for(int i = startPos; i < fftLin.specSize() + startPos; i++)
     {
       int t = i - startPos;
@@ -67,7 +67,7 @@ void draw(){
       }
       
       if(sinePlotChckbx.isSelected()){
-        drawHorAxis();
+        
         drawLine(i,  height - 25, i, height - 25 - (float)(fftLin.getBand(t)) * slider1.getValueF());
         if(sinePlotChckbx.isSelected()){
           drawLinLeft(i,t);
@@ -158,20 +158,11 @@ private void drawLine(float x1, float y1, float x2, float y2){
 private void drawHorAxis(){
   drawLine(startPos, height - 12.5f, fftLin.specSize() + 5, height - 12.5f);
   textSize(11f);
-  final HashSet<Integer> labels = new HashSet<Integer>();
   
   for(int i = startPos; i < fftLin.specSize() + startPos; i += (fftLin.specSize()/fftLin.getBandWidth()) * 10){
       drawLine(i, height - 18.25f, i , height - 9.25f); 
-      labels.add(i);
+      text(String.valueOf((i - startPos) * fftLin.getBandWidth()), i - 5, height - 5.25f);
   }
-  
-  Consumer<Integer> c = new Consumer(){
-    public void accept(Object t){
-        text(String.valueOf((new Integer(t.toString()) - startPos) * fftLin.getBandWidth()), new Float(t.toString()), height - 8.25f);
-    }
-  };
-  
-  labels.forEach(c);
   
   text("[Hz]", fftLin.specSize() + 50f, height - 10.5f);
   textSize(18f);
