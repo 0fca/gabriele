@@ -13,8 +13,8 @@
  * Do not rename this tab!
  * =========================================================
  */
-
 public void typeCbx_clickEvt(GDropList source, GEvent event) { //_CODE_:typeCbx:342525:
+  sinePlotChckbx.setEnabled(typeCbx.getSelectedIndex() == 0 ? true : false );
 } //_CODE_:typeCbx:342525:
 
 public void slider1_change1(GSlider source, GEvent event) { //_CODE_:slider1:334156:
@@ -29,6 +29,22 @@ public void checkbox1_clicked1(GCheckbox source, GEvent event) { //_CODE_:sinePl
   }
 } //_CODE_:sinePlotChckbx:934500:
 
+public void windowTypeCbx_click1(GDropList source, GEvent event) { //_CODE_:windowTypCbx:8787println(FFT.GAUSS);03:
+  Field[] fs = FFT.class.getFields();
+  for(Field f : fs){
+    //println(f.toString().toLowerCase());
+     if(f.toString().toLowerCase().contains(source.getSelectedText().toLowerCase())){
+       try{
+         println(f.get(null));
+         fftLin.window((WindowFunction)f.get(null));
+       }catch(IllegalAccessException e){
+         e.printStackTrace();
+       }
+     }
+  }
+  
+} //_CODE_:windowTypCbx:878703:
+
 
 
 // Create all the GUI controls. 
@@ -36,8 +52,8 @@ public void checkbox1_clicked1(GCheckbox source, GEvent event) { //_CODE_:sinePl
 public void createGUI(){
   G4P.messagesEnabled(true);
   G4P.setGlobalColorScheme(GCScheme.BLUE_SCHEME);
-  //G4P.setCursor(ARROW);
-  //surface.setTitle("Natalie");
+  G4P.setCursor(ARROW);
+  surface.setTitle("Natalie");
   typeCbx = new GDropList(this, 31, 38, 192, 80, 3);
   typeCbx.setItems(loadStrings("list_342525"), 0);
   typeCbx.setLocalColorScheme(GCScheme.CYAN_SCHEME);
@@ -56,9 +72,13 @@ public void createGUI(){
   sinePlotChckbx.setIconAlign(GAlign.LEFT, GAlign.MIDDLE);
   sinePlotChckbx.setText("Standard spectrum plot");
   sinePlotChckbx.setLocalColorScheme(GCScheme.CYAN_SCHEME);
-  sinePlotChckbx.setOpaque(true);
+  sinePlotChckbx.setOpaque(false);
   sinePlotChckbx.addEventHandler(this, "checkbox1_clicked1");
   sinePlotChckbx.setSelected(true);
+  windowTypCbx = new GDropList(this, 509, 38, 132, 80, 3);
+  windowTypCbx.setItems(loadStrings("list_878703"), 0);
+  windowTypCbx.setLocalColorScheme(GCScheme.CYAN_SCHEME);
+  windowTypCbx.addEventHandler(this, "windowTypeCbx_click1");
 }
 
 // Variable declarations 
@@ -66,3 +86,4 @@ public void createGUI(){
 GDropList typeCbx; 
 GSlider slider1; 
 GCheckbox sinePlotChckbx; 
+GDropList windowTypCbx; 

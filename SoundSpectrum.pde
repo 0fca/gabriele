@@ -4,24 +4,27 @@ import java.awt.*;
 import g4p_controls.*;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.lang.reflect.*;
+import java.util.function.*;
 
 private Minim minim;  
-private FFT fftLin, fftLog;
+private FFT fftLin, fftLog,fftLinl, fftLinr;
+
 private AudioInput in;
 
 final float spectrumScale = 4;
-final int startPos = 20;
+final int startPos = 30;
 private PFont font;
 
-void setup()
-{
+void setup(){
   
   size(700, 480, P2D);
   minim = new Minim(this);
   in = minim.getLineIn(Minim.STEREO);
-  fftLin = new FFT( 1024, 44100 );
-
-  fftLin.linAverages( 50 );
+  fftLin = fftLinl = fftLinr = new FFT( 1024, 44100 );
+  fftLin.linAverages(50);
+  fftLinl.linAverages(25);
+  fftLinr.linAverages(25);
 
   fftLog = new FFT( 1024, 44100 );
 
@@ -33,8 +36,7 @@ void setup()
   createGUI();
 }
 
-void draw()
-{
+void draw(){
   background(0);
   
   textFont(font);
@@ -42,39 +44,43 @@ void draw()
  
   float centerFrequency = 0;
   
-  fftLin.forward( in.mix );
-  fftLog.forward( in.mix );
+  fftLin.forward(in.mix);
+  fftLog.forward(in.mix);
+  fftLinl.forward(in.left);
+  fftLinr.forward(in.right);
+  
   int r = ThreadLocalRandom.current().nextInt(0, 255);
   drawVertAxis();
   switch(typeCbx.getSelectedIndex()){
 
     case 0:
     noFill();
+
     for(int i = startPos; i < fftLin.specSize() + startPos; i++)
     {
+      int t = i - startPos;
       if ( i == mouseX ){
-        centerFrequency = fftLin.indexToFreq(i);
+        centerFrequency = fftLin.indexToFreq(t);
         stroke(255, 0, 0);
-      }
-      else{
+      }else{
           stroke(0, 230, 255);
       }
       
       if(sinePlotChckbx.isSelected()){
         drawHorAxis();
-        drawLine(i,  height - 25, i, height - 25 - (float)(fftLin.getBand(i)) * slider1.getValueF());
-        
+        drawLine(i,  height - 25, i, height - 25 - (float)(fftLin.getBand(t)) * slider1.getValueF());
+        if(sinePlotChckbx.isSelected()){
+          drawLinLeft(i,t);
+          drawLinRight(i,t);
+        }
       }else{
-        double sin = (double) (75 * Math.sin((i / 100.0) * 2 * Math.PI));
-        drawLine(i,  height, i, height - (float)(fftLin.getBand(i) * sin ) * slider1.getValueF());
+        double sin = (double) (75 * Math.sin((t / 100.0) * 2 * Math.PI));
+        drawLine(i,  height, i, height - (float)(fftLin.getBand(t) * sin ) * slider1.getValueF());
       }
       
     }
-    if(sinePlotChckbx.isSelected()){
-      drawLinLeft();
-      drawLinRight();
-    }
-    
+    text("Right channel spectrum", startPos, 325);
+    text("Left channel spectrum", startPos, height % 150 * 5 + 25);
     text("Spectrum Center Frequency: " + centerFrequency, startPos, 25);
     break;
   
@@ -96,7 +102,7 @@ void draw()
           fill(r/(t+1), r, r  % 255);
       }
       
-      rect(t*w, height, t*w + w, height - fftLin.getAvg(t)*spectrumScale * slider1.getValueF());
+      rect(t*w, height, t*w + w, height - fftLin.getAvg(t)* spectrumScale * slider1.getValueF());
       
     }
     break;
@@ -105,8 +111,9 @@ void draw()
     int wi = int(width/fftLog.avgSize());
     for(int i = startPos; i < fftLog.avgSize() + startPos; i++)
     {
-      centerFrequency    = fftLog.getAverageCenterFrequency(i - startPos);
-      float averageWidth = fftLog.getAverageBandWidth(i - startPos);   
+      int t = i - startPos;
+      centerFrequency    = fftLog.getAverageCenterFrequency(t);
+      float averageWidth = fftLog.getAverageBandWidth(t);   
 
       float lowFreq  = centerFrequency - averageWidth/2;
       float highFreq = centerFrequency + averageWidth/2;
@@ -114,9 +121,9 @@ void draw()
       int xl = (int)fftLog.freqToIndex(lowFreq);
       int xr = (int)fftLog.freqToIndex(highFreq);
 
-      if ( mouseX >= i*wi && mouseX < i*wi + wi )
+      if ( mouseX >= t*wi && mouseX < t*wi + wi )
       {
-        centerFrequency = fftLin.getAverageCenterFrequency(i);
+        centerFrequency = fftLin.getAverageCenterFrequency(t);
         
         fill(255, 128);
         text("Logarithmical Average Center Frequency: " + centerFrequency, 5, 25);
@@ -128,28 +135,20 @@ void draw()
           fill(r/(i+1), r, r  % 255);
       }
       
-      rect( xl, height, xr, height - fftLog.getAvg(i - startPos) * spectrumScale * slider1.getValueF());
+      rect( xl, height, xr, height - fftLog.getAvg(t) * spectrumScale * slider1.getValueF());
     }
     break;
   }
 }
 
-public void drawLinLeft(){
-  text("Left channel spectrum", startPos, height % 150 * 5 + 25);
-  fftLin.forward(in.left);
-  
-  for(int i = startPos; i < fftLin.specSize() + startPos; i++){
-      drawLine(i, height % 150 * 5, i, height % 150 * 5 - (fftLin.getBand(i) * slider1.getValueF()));
-  }
+public void drawLinLeft(int i, int t){
+  fill(255,128);
+  drawLine(i, height % 150 * 5, i, height % 150 * 5 - (fftLinl.getBand(t) * slider1.getValueF()));
 }
 
-public void drawLinRight(){
-  text("Right channel spectrum", startPos, 325);
-  fftLin.forward(in.right);
-  
-  for(int i = startPos; i < fftLin.specSize() + startPos; i++){
-      drawLine(i, 300 , i, (300 - fftLin.getBand(i) * slider1.getValueF()));
-  }
+public void drawLinRight(int i, int t){
+  fill(255,128);
+  drawLine(i, 300 , i, (300 - fftLinr.getBand(t) * slider1.getValueF()));
 }
 
 private void drawLine(float x1, float y1, float x2, float y2){
@@ -158,18 +157,35 @@ private void drawLine(float x1, float y1, float x2, float y2){
 
 private void drawHorAxis(){
   drawLine(startPos, height - 12.5f, fftLin.specSize() + 5, height - 12.5f);
+  textSize(11f);
+  final HashSet<Integer> labels = new HashSet<Integer>();
+  
   for(int i = startPos; i < fftLin.specSize() + startPos; i += (fftLin.specSize()/fftLin.getBandWidth()) * 10){
-      drawLine(i - startPos, height - 18.25f, i - startPos , height - 9.25f);
-      textSize(11f);
-      text(String.valueOf(((i - startPos) * fftLin.getBandWidth())), i - 5 , height - 5.25f);
+      drawLine(i, height - 18.25f, i , height - 9.25f); 
+      labels.add(i);
   }
-  text("[Hz]", fftLin.specSize() + 25f, height - 10.5f);
+  
+  Consumer<Integer> c = new Consumer(){
+    public void accept(Object t){
+        text(String.valueOf((new Integer(t.toString()) - startPos) * fftLin.getBandWidth()), new Float(t.toString()), height - 8.25f);
+    }
+  };
+  
+  labels.forEach(c);
+  
+  text("[Hz]", fftLin.specSize() + 50f, height - 10.5f);
   textSize(18f);
 }
 
 private void drawVertAxis(){
-  drawLine(5 , height, 5, 0);
-  for(int i = (startPos + 2); i < height; i+= 10){
-    drawLine(5, i, 10, i);
+  if(typeCbx.getSelectedIndex() == 0){
+    drawLine(5 , height + 10, 5, height - Math.abs(in.getGain()) * 1.5 );
+    textSize(10f);
+    text("[dB]", 2.5f ,height - Math.abs(in.getGain()) * 1.65);
+    for(int i = 25; i < Math.abs(in.getGain()) + 25 ; i += 8){
+      drawLine(5, height - i, 10, height - i);
+      text(String.valueOf(25-i), 15 , height - i);
+    }
+    textSize(18f);
   }
 }
