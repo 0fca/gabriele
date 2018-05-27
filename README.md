@@ -1,11 +1,11 @@
-# Natalie
+# Maggie
 Simple audio signal visualizer
 
-Natalie is built in pure Processing(using Java language of version 7). 
+Maggie is built in pure Processing(using Java language of version 7). 
 
 # Features
 
-Natalie has the following features:
+Maggie has the following features:
 * viewing spectrum of sound played back in real time; 
   there are three supported types of spectrum:
     * linear standard spectrum,
@@ -21,10 +21,10 @@ I want to add some features like osciloscope to generate harmonical singals like
 
 # Technical notes
 
-Natalie is released for: 
+Maggie is released for: 
 - [x] Windows,
 - [ ] GNU/Linux. - I'm gonna start testing version for this OS in no time. 
-Natalie is 64-bit __only__. Built and compiled using Processing 3 with Java 1.8u161.
+Maggie is 64-bit __only__. Built and compiled using Processing 3 with Java 1.8u161.
 
 Tests:
 - Windows 10 x64 Pro on Java 1.8u161
