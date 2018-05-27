@@ -24,6 +24,7 @@ I want to add some features like osciloscope to generate harmonical singals like
 Maggie is released for: 
 - [x] Windows,
 - [ ] GNU/Linux. - I'm gonna start testing version for this OS in no time. 
+
 Maggie is 64-bit __only__. Built and compiled using Processing 3 with Java 1.8u161.
 
 Tests:
