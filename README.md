@@ -1,11 +1,11 @@
-# Maggie
+# Gabriele
 Simple audio signal visualizer
 
 Maggie is built in pure Processing(using Java language of version 7). 
 
 # Features
 
-Maggie has the following features:
+Gabriele has the following features:
 * viewing spectrum of sound played back in real time; 
   there are three supported types of spectrum:
     * linear standard spectrum,
@@ -21,11 +21,11 @@ I want to add some features like osciloscope to generate harmonical singals like
 
 # Technical notes
 
-Maggie is released for: 
+Gabriele is released for: 
 - [x] Windows,
 - [ ] GNU/Linux. - I'm gonna start testing version for this OS in no time. 
 
-Maggie is 64-bit __only__. Built and compiled using Processing 3 with Java 1.8u161.
+Gabriele is 64-bit __only__. Built and compiled using Processing 3 with Java 1.8u161.
 
 Tests:
 - Windows 10 x64 Pro on Java 1.8u161
